@@ -23,14 +23,6 @@ defmodule Instrumental do
     end
   end
 
-  def gauge_absolute(metric, value, time \\ Time.unix_monotonic) when is_binary(metric) do
-    case Protocol.format(:gauge_absolute, metric, value, time) do
-      {:ok, cmd} ->
-        Connection.send_cmd(cmd)
-      error -> error
-    end
-  end
-
   def increment(metric, value \\ 1, time \\ Time.unix_monotonic) when is_binary(metric) do
     case Protocol.format(:increment, metric, value, time) do
       {:ok, cmd} ->
