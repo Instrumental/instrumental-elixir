@@ -67,9 +67,30 @@ defmodule ImportantThing do
 end
 
 ```
-
 * `alias` optional :smiley:
 
+
+### Functions
+
+```elixir
+# increments
+Instrumental.increment("metric.name");
+
+# gauges
+Instrumental.gauge("metric.name", 82.12);
+
+# notices
+Instrumental.notice("An event occurred");
+
+# timing a function (in seconds)
+Instrumental.time("metric.name", &Something.function/0);
+Instrumental.time("metric.name", fn -> Something.function(arg1) end)
+
+# timing a function (in milliseconds)
+Instrumental.time_ms("metric.name", &Something.function/0);
+Instrumental.time_ms("metric.name", fn -> Something.function(arg1) end)
+
+```
 
 ## Authors
 

@@ -48,16 +48,20 @@ defmodule Instrumental do
   end
 
   def time(metric, multiplier \\ 1, timeout \\ :infinity, fun) when is_binary(metric) and is_function(fun) do
-    start  = Time.unix_monotonic
-    result = nil
-    try do
-      task     = Task.async fn -> fun.() end
-      result   = Task.await(task, timeout)
-    after
-      duration = Time.unix_monotonic - start
-      gauge(metric, (duration * multiplier), start)
-    end
+    start = :os.system_time(:milli_seconds)
+    result =
+      try do
+        task   = Task.async fn -> fun.() end
+        Task.await(task, timeout)
+      after
+        duration = (:os.system_time(:milli_seconds) - start) / 1000
+        gauge(metric, (duration * multiplier), start / 1000)
+      end
     result
+  end
+
+  def time_ms(metric, timeout \\ :infinity, fun) when is_binary(metric) and is_function(fun) do
+    time(metric, 1000, timeout, fun)
   end
 
   def version do
