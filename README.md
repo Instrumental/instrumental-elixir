@@ -47,25 +47,25 @@ defmodule ImportantThing do
   alias Instrumental, as: I
 
   def compute_important_thing do
-    # tell Instrumental how long it takes to compute a
-    # value so we can know if our performance is changing
-    # over time.
-    I.time("ImportantThing.timing") do
-      value = compute_value
-      # tell Instrumental a value that was computed so we
-      # can track its change over time
-      I.gauge("ImportantThing.value", value)
-      value
-    end
+    # tell Instrumental how long it takes to run a
+    # computation so we can know if our performance
+    # is changing over time.
+    value = I.time("ImportantThing.timing", &ImportantThing.compute/0)
+    # tell Instrumental a value that was computed so we
+    # can track its change over time
+    I.gauge("ImportantThing.value", value)
+    value
   end
 
-  defp compute do
+  def compute do
     # tell Instrumental we computed a value so we can know
     # how often that is happening.
     I.increment("ImportantThing.computed")
-    do_some_hard_stuff_here
+
+    # do some hard stuff here
   end
 end
+
 ```
 
 * `alias` optional :smiley:
