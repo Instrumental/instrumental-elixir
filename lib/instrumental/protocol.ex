@@ -12,10 +12,9 @@ defmodule Instrumental.Protocol do
   @notice_match Regex.compile!("[\n\r]")
   @increment "increment"
   @gauge "gauge"
-  @gauge_absolute "gauge_absolute"
   @notice "notice"
 
-  @type metric_type :: :increment | :gauge | :gauge_absolute | :notice
+  @type metric_type :: :increment | :gauge | :notice
 
   @doc """
   String to be sent to instrumental connection to perform authentication.
@@ -38,12 +37,6 @@ defmodule Instrumental.Protocol do
   def format(:gauge, metric, value, time) do
     case metric_valid?(metric) do
       true  -> {:ok, build_command([@gauge, metric, value, time])}
-      false -> {:error, :invalid_metric}
-    end
-  end
-  def format(:gauge_absolute, metric, value, time) do
-    case metric_valid?(metric) do
-      true  -> {:ok, build_command([@gauge_absolute, metric, value, time])}
       false -> {:error, :invalid_metric}
     end
   end
