@@ -1,3 +1,5 @@
+** This is a fork and you should not depend on it yet. Check the original repo for the capabilities of the package in hex. **
+
 # Instrumental
 
 An Elixir client for [Instrumental](http://instrumentalapp.com)
