@@ -9,6 +9,7 @@ defmodule Instrumental.Protocol do
   alias Instrumental.OS
 
   @metric_match Regex.compile!("^[\-_.[:alnum:]]+$")
+  @notice_match Regex.compile!("[\n\r]")
   @increment "increment"
   @gauge "gauge"
   @gauge_absolute "gauge_absolute"
@@ -47,7 +48,10 @@ defmodule Instrumental.Protocol do
     end
   end
   def format(:notice, time, duration, message) do
-    {:ok, build_command([@notice, time, duration, message])}
+    case notice_valid?(message) do
+      true  -> {:ok, build_command([@notice, time, duration, message])}
+      false -> {:error, :invalid_notice}
+    end
   end
 
   @doc """
@@ -88,6 +92,13 @@ defmodule Instrumental.Protocol do
     case Regex.run(@metric_match, metric) do
       nil -> false
       _   -> true
+    end
+  end
+
+  defp notice_valid?(message) do
+    case Regex.run(@notice_match, message) do
+      nil -> true
+      _   -> false
     end
   end
 end
