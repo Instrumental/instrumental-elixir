@@ -1,4 +1,4 @@
-** This is a fork and you should not depend on it yet. Check the original repo for the capabilities of the package in hex. **
+**This is a fork and you should not depend on it yet. Check the original repo for the capabilities of the package in hex.**
 
 # Instrumental
 
