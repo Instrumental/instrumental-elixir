@@ -2,5 +2,5 @@
 set -e
 cd "$(dirname "$0")/.."
 
-type elixir || $(brew install elixir)
+type elixir || brew install elixir
 mix deps get
