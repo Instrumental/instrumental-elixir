@@ -8,7 +8,7 @@ defmodule Instrumental.Protocol do
   alias Instrumental.Config
   alias Instrumental.OS
 
-  @metric_match Regex.compile!("\s")
+  @metric_match Regex.compile!("^[\-_.[:alnum:]]+$")
   @increment "increment"
   @gauge "gauge"
   @gauge_absolute "gauge_absolute"
@@ -86,8 +86,8 @@ defmodule Instrumental.Protocol do
 
   defp metric_valid?(metric) do
     case Regex.run(@metric_match, metric) do
-      nil -> true
-      _   -> false
+      nil -> false
+      _   -> true
     end
   end
 end

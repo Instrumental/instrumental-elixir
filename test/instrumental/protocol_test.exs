@@ -21,4 +21,15 @@ defmodule Instrumental.ProtocolTest do
 
     assert msg == "gauge #{metric} #{value} #{time}\n"
   end
+
+  test "format/5 formatting for invalid metrics" do
+    metric     = "bad metric"
+    value      = 1
+    time       = Time.unix_monotonic
+    {:error, :invalid_metric} = Protocol.format(:gauge, "", value, time)
+    {:error, :invalid_metric} = Protocol.format(:gauge, "bad metric", value, time)
+    {:error, :invalid_metric} = Protocol.format(:gauge, " badmetric", value, time)
+    {:error, :invalid_metric} = Protocol.format(:gauge, "badmetric ", value, time)
+    {:error, :invalid_metric} = Protocol.format(:gauge, "b(admetric", value, time)
+  end
 end
