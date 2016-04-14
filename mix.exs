@@ -42,7 +42,7 @@ defmodule Instrumental.Mixfile do
 
   defp package do
     %{licenses: ["MIT"],
-      contributors: ["Jamie Winsor"],
-      links: %{"Github" => "https://github.com/undeadlabs/instrumental-ex"}}
+      contributors: ["Jamie Winsor", "Joel Meador", "Elijah Miller", "Matthew Gordon"],
+      links: %{"Github" => "https://github.com/instrumental/instrumental-elixir"}}
   end
 end

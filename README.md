@@ -97,3 +97,6 @@ Instrumental.time_ms("metric.name", fn -> Something.function(arg1) end)
 ## Authors
 
 * Jamie Winsor (<jamie@undeadlabs.com>)
+* Joel Meador
+* Elijah Miller
+* Matthew Gordon
