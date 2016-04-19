@@ -23,7 +23,6 @@ defmodule Instrumental.ProtocolTest do
   end
 
   test "format/5 formatting for invalid metrics" do
-    metric     = "bad metric"
     value      = 1
     time       = Time.unix_monotonic
     {:error, :invalid_metric} = Protocol.format(:gauge, "", value, time)
