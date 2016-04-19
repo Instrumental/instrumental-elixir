@@ -1,8 +1,10 @@
 **This is a fork and you should not depend on it yet. Check the original repo for the capabilities of the package in hex.**
 
-# Instrumental
+# Instrumental Elixir Agent
 
-An Elixir client for [Instrumental](http://instrumentalapp.com)
+Instrumental is a [application monitoring platform](https://instrumentalapp.com) built for developers who want a better understanding of their production software. Powerful tools, like the [Instrumental Query Language](https://instrumentalapp.com/docs/query-language), combined with an exploration-focused interface allow you to get real answers to complex questions, in real-time.
+
+This agent supports custom metric monitoring for Elixir applications. It provides high-data reliability at high scale, without ever blocking your process or causing an exception. 
 
 ## Requirements
 
@@ -28,7 +30,7 @@ Then run `mix deps.get` in your shell to fetch the dependencies.
 
 ## Configuration
 
-Add an instrumental config option and a value for token in your `config.exs`
+Add an Instrumental config option and a value for token in your `config.exs`
 
 ```elixir
 config :instrumental,
@@ -37,9 +39,9 @@ config :instrumental,
 
 ### Options
 
-  * token (required) - api key for authenticating with instrumental
-  * host (optional) - host of instrumental collector, *default: collector.instrumentalapp.com*
-  * port (optional) - port of instrumental collector, *default: 8000*
+  * token (required) - api key for authenticating with Instrumental
+  * host (optional) - host of Instrumental collector, *default: collector.instrumentalapp.com*
+  * port (optional) - port of Instrumental collector, *default: 8000*
 
 
 ## Usage
