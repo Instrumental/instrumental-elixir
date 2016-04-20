@@ -6,6 +6,12 @@ defmodule Instrumental.MetricTest do
   use ExUnit.Case
 
 
+  setup_all do
+    {:ok, body} = File.read("test_key")
+    Application.put_env(Instrumental.Config.app, :token, body)
+    {:ok, pid} = Connection.start_link
+    :timer.sleep(5000)
+  end
 
   # {:ok, cmd} = Protocol.format(:gauge, "elixir.gauge", 1, Time.unix_monotonic)
   # :ok = Connection.send_cmd(cmd)
@@ -21,39 +27,21 @@ defmodule Instrumental.MetricTest do
 
   
   test "sends gauge correctly" do
-    # :dbg.tracer
-    # :dbg.p self()
-    {:ok, body} = File.read("test_key")
-    Application.put_env(Instrumental.Config.app, :token, body)
-    {:ok, pid} = Connection.start_link
-    :timer.sleep(5000)
     I.gauge("elixir.gauge", 1)
     :timer.sleep(5000)
   end
 
   test "sends increment correctly" do
-    {:ok, body} = File.read("test_key")
-    Application.put_env(Instrumental.Config.app, :token, body)
-    {:ok, pid} = Connection.start_link
-    :timer.sleep(5000)
     I.increment("elixir.increment")
     :timer.sleep(5000)
   end
 
   test "sends time correctly" do
-    {:ok, body} = File.read("test_key")
-    Application.put_env(Instrumental.Config.app, :token, body)
-    {:ok, pid} = Connection.start_link
-    :timer.sleep(5000)
     :ok = I.time("elixir.time", fn -> :timer.sleep(100) end)
     :timer.sleep(5000)
   end
 
   test "sends notice correctly" do
-    {:ok, body} = File.read("test_key")
-    Application.put_env(Instrumental.Config.app, :token, body)
-    {:ok, pid} = Connection.start_link
-    :timer.sleep(5000)
     :ok = I.notice("elixir test notice")
     :timer.sleep(5000)
   end  
