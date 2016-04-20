@@ -28,7 +28,7 @@ defmodule Instrumental.Config do
 
   @spec port :: integer
   def port do
-    Application.get_env(app, :port, 8000)
+    Application.get_env(app, :port, 8001)
   end
 
   @spec token :: binary
