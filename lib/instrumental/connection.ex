@@ -6,11 +6,12 @@
 
 defmodule Instrumental.Connection do
   defmodule State do
-    defstruct sock: nil, state: nil
+    defstruct sock: nil, state: nil, queue: []
 
     @type t :: %{
       sock: pid,
-      state: connection_state
+      state: connection_state,
+      queue: Array
     }
 
     @type connection_state :: :hello | :connected | :auth
@@ -45,18 +46,25 @@ defmodule Instrumental.Connection do
 
   def init([]) do
     if Config.enabled? do
-      {:ok, %State{}, 0}
+      {:ok, %State{queue: []}, 0}
     else
       :ignore
     end
   end
 
-  def handle_cast({:send, cmd}, %{sock: sock, state: :connected} = state) do
-    :gen_tcp.send(sock, cmd)
+  def handle_cast({:send, cmd}, %{sock: sock, state: :connected, queue: queue} = state) do
+    queue = queue ++ [cmd]
+    queue |> Enum.each(fn(queued_cmd) -> :gen_tcp.send(sock, queued_cmd) end)
+
+    {:noreply, %State{sock: sock, state: :connected, queue: []}}
+  end
+  def handle_cast({:send, cmd}, %{sock: nil, queue: queue} = state) do
+    {:noreply, %State{queue: queue ++ [cmd]}, 0}
+  end
+  def handle_cast(_, state) do
     {:noreply, state}
   end
-  def handle_cast(_, state), do: {:noreply, state}
-
+  
   def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :hello} = state) do
     case :gen_tcp.send(sock, Protocol.authenticate) do
       :ok ->
@@ -81,15 +89,15 @@ defmodule Instrumental.Connection do
     {:noreply, %{state | sock: nil, state: nil}, @connect_retry}
   end
 
-  def handle_info(:timeout, %{sock: nil}) do
+  def handle_info(:timeout, %{sock: nil, queue: queue}) do
     Logger.info "Connecting to instrumental"
     case connect() do
       {:ok, sock} ->
         Logger.info "Instrumental connected"
-        {:noreply, %State{sock: sock}, 0}
+        {:noreply, %State{sock: sock, queue: queue}, 0}
       _error ->
         Logger.error "Failed to connect to instrumental"
-        {:noreply, %State{}, @connect_retry}
+        {:noreply, %State{queue: queue}, @connect_retry}
     end
   end
   def handle_info(:timeout, %{sock: sock, state: nil} = state) do
@@ -124,6 +132,7 @@ defmodule Instrumental.Connection do
   #
 
   defp connect do
-    :gen_tcp.connect(Config.host, Config.port, [mode: :binary, packet: 0, active: false, keepalive: true])
+    :gen_tcp.connect(Config.host, Config.port,
+                      [mode: :binary, packet: 0, active: false, keepalive: true])
   end
 end
