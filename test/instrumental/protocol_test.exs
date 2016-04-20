@@ -4,7 +4,7 @@ defmodule Instrumental.ProtocolTest do
 
   use ExUnit.Case
 
-  test "format/5 formatting a valid increment message" do
+  test "format/4 formatting a valid increment message" do
     metric     = "test-metric"
     value      = 1
     time       = Time.unix_monotonic
@@ -13,7 +13,7 @@ defmodule Instrumental.ProtocolTest do
     assert msg == "increment #{metric} #{value} #{time}\n"
   end
 
-  test "format/5 formatting a valid gauage message" do
+  test "format/4 formatting a valid gauage message" do
     metric     = "test-metric"
     value      = 1
     time       = Time.unix_monotonic
@@ -22,7 +22,7 @@ defmodule Instrumental.ProtocolTest do
     assert msg == "gauge #{metric} #{value} #{time}\n"
   end
 
-  test "format/5 formatting for invalid metrics" do
+  test "format/4 formatting for invalid metrics" do
     metric     = "bad metric"
     value      = 1
     time       = Time.unix_monotonic
@@ -33,7 +33,7 @@ defmodule Instrumental.ProtocolTest do
     {:error, :invalid_metric} = Protocol.format(:gauge, "b(admetric", value, time)
   end
 
-  test "format/5 formatting for valid notice" do
+  test "format/4 formatting for valid notice" do
     duration   = 1
     time       = Time.unix_monotonic
     message    = "hello world!"
@@ -42,7 +42,7 @@ defmodule Instrumental.ProtocolTest do
     assert msg == "notice #{time} #{duration} #{message}\n"
   end
 
-  test "format/5 formatting for invalid notices" do
+  test "format/4 formatting for invalid notices" do
     duration   = 1
     time       = Time.unix_monotonic
     {:error, :invalid_notice} = Protocol.format(:notice, time, duration, "new\nline")
