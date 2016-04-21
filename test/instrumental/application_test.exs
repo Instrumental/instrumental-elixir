@@ -13,7 +13,7 @@ defmodule Instrumental.MetricTest do
 
   setup do
     :timer.sleep(1000) # wait for teardown of previous server
-    {:ok, server} = KVServer.start(1,self)
+    {:ok, server} = TestServer.start(1,self)
     Application.put_env(Instrumental.Config.app, :host, "localhost")
     Application.put_env(Instrumental.Config.app, :port, 4040)
     Application.put_env(Instrumental.Config.app, :token, "test_token")
@@ -57,5 +57,5 @@ defmodule Instrumental.MetricTest do
   # test "sends notice correctly" do
   #   :ok = I.notice("elixir test notice")
   #   :timer.sleep(5000)
-  # end  
+  # end
 end
