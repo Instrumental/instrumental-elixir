@@ -28,7 +28,7 @@ defmodule TestServer do
   defp loop_acceptor(socket, test_process) do
     {:ok, client} = :gen_tcp.accept(socket)
     {:ok, pid} = Task.Supervisor.start_child(TestServer.TaskSupervisor,
-      fn -> serve(client, [], test_process) end)
+      fn -> serve(client, test_process) end)
     :ok = :gen_tcp.controlling_process(client, pid)
     loop_acceptor(socket, test_process)
   end
@@ -37,10 +37,9 @@ defmodule TestServer do
   #   write_line("ok\nok\n", socket)
   # end
 
-  defp serve(socket, commands, test_process) do
+  defp serve(socket, test_process) do
     command = socket |> read_line()
     Logger.info "COMMAND:: #{inspect command}"
-    new_commands = commands ++ [command]
 
     if Regex.match?(~r/hello/, command) do
       Logger.info "OK"
@@ -55,7 +54,7 @@ defmodule TestServer do
     Logger.info "SEND TO TEST"
     send(test_process, {:command, command})
 
-    serve(socket, commands ++ [command], test_process)
+    serve(socket, test_process)
   end
 
   defp read_line(socket) do
