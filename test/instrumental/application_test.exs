@@ -13,12 +13,12 @@ defmodule Instrumental.MetricTest do
 
   test "sends gauge correctly" do
     {:ok, server} = KVServer.start(1,self)
-    {:ok, body} = File.read("test_key")
+    
     Application.put_env(Instrumental.Config.app, :host, "localhost")
     Application.put_env(Instrumental.Config.app, :port, 4040)
-    Application.put_env(Instrumental.Config.app, :token, body)
+    Application.put_env(Instrumental.Config.app, :token, "test_token")
     {:ok, pid} = Connection.start_link
-    :timer.sleep(5000)
+
     hello_msg = receive do
       {:command, msg} -> msg
       _ -> assert false
@@ -29,29 +29,18 @@ defmodule Instrumental.MetricTest do
       _ -> assert false
     end
     Logger.info "after receive #{inspect authenticate_msg}"
-    :timer.sleep(5000)
+
     Logger.error "====================TEST================================"
     Logger.info "gauge"
     I.gauge("elixir.gauge", 1)
     Logger.info "gauge after"
-    bullshit_msg = receive do
-      {:command, msg} -> msg
-      _ -> assert false
-    end
-    Logger.info "after receive #{inspect bullshit_msg}"
     gauge_msg = receive do
       {:command, msg} -> msg
       _ -> assert false
     end
     Logger.info "after receive #{inspect gauge_msg}"
-    # RegExp = "gauge elixir.gauge 1",
+
     assert Regex.match?(~r/gauge elixir.gauge 1/, gauge_msg)
-    # case re:run(gauge_msg, RegExp) do
-    #   {match, Captured} -> assert true
-    #   nomatch -> assert false
-    # end
-    # assert ~r/gauge elixir.gauge 1/.run(gauge_msg)
-    :timer.sleep(5000)
   end
 
   # test "sends increment correctly" do
