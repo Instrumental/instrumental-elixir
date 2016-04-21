@@ -66,6 +66,7 @@ defmodule Instrumental.MetricTest do
     end
   end
 
+  @tag timeout: 2000
   test "sends time correctly" do
     I.time("elixir.time", fn -> :timer.sleep(100) end)
     # expecting the time to be something between 0.100 and 0.109
@@ -75,6 +76,7 @@ defmodule Instrumental.MetricTest do
     end
   end
 
+  @tag timeout: 2000
   test "sends notice correctly" do
     I.notice("elixir test notice")
     notice_msg = receive do
