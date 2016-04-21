@@ -23,22 +23,17 @@ defmodule Instrumental.MetricTest do
       {:command, msg} -> msg
       _ -> assert false
     end
-    Logger.info "after receive #{inspect hello_msg}"
+
     authenticate_msg = receive do
       {:command, msg} -> msg
       _ -> assert false
     end
-    Logger.info "after receive #{inspect authenticate_msg}"
 
-    Logger.error "====================TEST================================"
-    Logger.info "gauge"
     I.gauge("elixir.gauge", 1)
-    Logger.info "gauge after"
     gauge_msg = receive do
       {:command, msg} -> msg
       _ -> assert false
     end
-    Logger.info "after receive #{inspect gauge_msg}"
 
     assert Regex.match?(~r/gauge elixir.gauge 1/, gauge_msg)
   end
