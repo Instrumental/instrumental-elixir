@@ -1,9 +1,3 @@
-#
-# The MIT License (MIT)
-#
-# Copyright (c) 2014 Undead Labs, LLC
-#
-
 defmodule Instrumental.Config do
   @spec app :: atom
   def app do
