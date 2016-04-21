@@ -22,6 +22,7 @@ defmodule TestServer do
     {:ok, socket} = :gen_tcp.listen(port,
                       [:binary, packet: :line, active: false, reuseaddr: true])
     Logger.info "Accepting connections on port #{port}"
+    send(test_process, {:started})
     loop_acceptor(socket, test_process)
   end
 
@@ -51,7 +52,7 @@ defmodule TestServer do
       write_line("ok\n", socket)
     end
 
-    Logger.debug "SEND TO TEST pid #{inspect test_process} command #{command}"
+    Logger.info "SEND TO TEST #{inspect test_process}: #{command}"
     send(test_process, {:command, command})
 
     serve(socket, test_process)

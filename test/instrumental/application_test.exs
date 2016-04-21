@@ -10,22 +10,37 @@ defmodule Instrumental.MetricTest do
   # :dbg.tracer
   # :dbg.p self()
 
+  def start_test_server do
+    Logger.info "start_test_server"
+    {status, server} = TestServer.start(1, self)
+    if status == :ok do
+      Logger.info "status was #{status}!"
+      {status, server}
+    else
+      Logger.info "status was #{status}... trying again"
+      :timer.sleep(10) # wait for teardown of previous server
+      start_test_server()
+    end
+  end
 
   setup do
-    :timer.sleep(1000) # wait for teardown of previous server
-    {:ok, server} = TestServer.start(1,self)
+    {:ok, server} = start_test_server()
+    receive do
+      { :started } -> Logger.info "started received"
+      _ -> assert false
+    end
     Application.put_env(Instrumental.Config.app, :host, "localhost")
     Application.put_env(Instrumental.Config.app, :port, 4040)
     Application.put_env(Instrumental.Config.app, :token, "test_token")
     {:ok, pid} = Connection.start_link
 
     hello_msg = receive do
-      {:command, msg} -> msg
+      {:command, msg} -> assert Regex.match?(~r/hello .+/, msg)
       _ -> assert false
     end
 
     authenticate_msg = receive do
-      {:command, msg} -> msg
+      {:command, msg} -> assert Regex.match?(~r/authenticate .+/, msg)
       _ -> assert false
     end
 
@@ -33,6 +48,7 @@ defmodule Instrumental.MetricTest do
   end
 
 
+  @tag timeout: 2000
   test "sends gauge correctly" do
     I.gauge("elixir.gauge", 1)
     receive do
@@ -41,6 +57,7 @@ defmodule Instrumental.MetricTest do
     end
   end
 
+  @tag timeout: 2000
   test "sends increment correctly" do
     I.increment("elixir.increment")
     receive do
