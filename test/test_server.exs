@@ -51,7 +51,7 @@ defmodule TestServer do
       write_line("ok\n", socket)
     end
 
-    Logger.info "SEND TO TEST"
+    Logger.debug "SEND TO TEST pid #{inspect test_process} command #{command}"
     send(test_process, {:command, command})
 
     serve(socket, test_process)
