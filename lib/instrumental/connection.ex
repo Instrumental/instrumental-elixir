@@ -52,9 +52,12 @@ defmodule Instrumental.Connection do
     end
   end
 
-  def handle_cast({:send, cmd}, %{sock: sock, state: :connected, queue: queue} = state) do
-    queue = queue ++ [cmd]
+  def send_queue(sock, queue) do
     queue |> Enum.each(fn(queued_cmd) -> :gen_tcp.send(sock, queued_cmd) end)
+  end
+
+  def handle_cast({:send, cmd}, %{sock: sock, state: :connected, queue: queue} = state) do
+    send_queue(sock, queue ++ [cmd])
 
     {:noreply, %State{sock: sock, state: :connected, queue: []}}
   end
@@ -65,7 +68,7 @@ defmodule Instrumental.Connection do
   def handle_cast(_, state) do
     {:noreply, state}
   end
-  
+
   def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :hello} = state) do
     case :gen_tcp.send(sock, Protocol.authenticate) do
       :ok ->
@@ -76,9 +79,10 @@ defmodule Instrumental.Connection do
         {:noreply, %{state | state: :auth}, @auth_retry}
     end
   end
-  def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :auth} = state) do
+  def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :auth, queue: queue} = state) do
     :inet.setopts(sock, [active: :once])
-    {:noreply, %{state | state: :connected}}
+    send_queue(sock, queue)
+    {:noreply, %{state | state: :connected, queue: []}}
   end
   def handle_info({:tcp, sock, _}, %{sock: sock} = state) do
     :inet.setopts(sock, [active: :once])
