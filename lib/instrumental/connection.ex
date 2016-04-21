@@ -58,8 +58,9 @@ defmodule Instrumental.Connection do
 
     {:noreply, %State{sock: sock, state: :connected, queue: []}}
   end
-  def handle_cast({:send, cmd}, %{sock: nil, queue: queue} = state) do
-    {:noreply, %State{queue: queue ++ [cmd]}, 0}
+  def handle_cast({:send, cmd}, %{queue: queue} = state) do
+    Logger.debug "CAST ACCUMULATE :: #{inspect state}"
+    {:noreply, %{state | queue: queue ++ [cmd]}, 0}
   end
   def handle_cast(_, state) do
     {:noreply, state}
@@ -114,7 +115,7 @@ defmodule Instrumental.Connection do
     case :gen_tcp.send(sock, Protocol.authenticate) do
       :ok ->
         :inet.setopts(sock, [active: :once])
-        {:noreply, %{state | auth: true}}
+        {:noreply, %{state | state: :auth}}
       {:error, _} ->
         Logger.error "Failed to authenticate with instrumental"
         {:noreply, state, @auth_retry}
