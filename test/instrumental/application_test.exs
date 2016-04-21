@@ -49,13 +49,22 @@ defmodule Instrumental.MetricTest do
     end
   end
 
-  # test "sends time correctly" do
-  #   :ok = I.time("elixir.time", fn -> :timer.sleep(100) end)
-  #   :timer.sleep(5000)
-  # end
+  test "sends time correctly" do
+    I.time("elixir.time", fn -> :timer.sleep(100) end)
+    # expecting the time to be something between 0.100 and 0.109
+    receive do
+      {:command, msg} -> assert Regex.match?(~r/gauge elixir.time 0.10/, msg)
+      _ -> assert false
+    end
+  end
 
-  # test "sends notice correctly" do
-  #   :ok = I.notice("elixir test notice")
-  #   :timer.sleep(5000)
-  # end  
+  test "sends notice correctly" do
+    I.notice("elixir test notice")
+    notice_msg = receive do
+      {:command, msg} -> msg
+      _ -> assert false
+    end
+    assert Regex.match?(~r/^notice/, notice_msg)
+    assert Regex.match?(~r/elixir test notice$/, notice_msg)
+  end
 end
