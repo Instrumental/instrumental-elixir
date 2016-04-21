@@ -1,17 +1,17 @@
-defmodule KVServer do
+defmodule TestServer do
   use Application
   require Logger
 
   @doc false
   def start(_type, test_process) do
     import Supervisor.Spec
-    
+
     children = [
-      supervisor(Task.Supervisor, [[name: KVServer.TaskSupervisor]]),
-      worker(Task, [KVServer, :accept, [4040, test_process]])
+      supervisor(Task.Supervisor, [[name: TestServer.TaskSupervisor]]),
+      worker(Task, [TestServer, :accept, [4040, test_process]])
     ]
 
-    opts = [strategy: :one_for_one, name: KVServer.Supervisor]
+    opts = [strategy: :one_for_one, name: TestServer.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
@@ -27,7 +27,7 @@ defmodule KVServer do
 
   defp loop_acceptor(socket, test_process) do
     {:ok, client} = :gen_tcp.accept(socket)
-    {:ok, pid} = Task.Supervisor.start_child(KVServer.TaskSupervisor,
+    {:ok, pid} = Task.Supervisor.start_child(TestServer.TaskSupervisor,
       fn -> serve(client, [], test_process) end)
     :ok = :gen_tcp.controlling_process(client, pid)
     loop_acceptor(socket, test_process)
@@ -51,7 +51,7 @@ defmodule KVServer do
       Logger.info "OK"
       write_line("ok\n", socket)
     end
-    
+
     Logger.info "SEND TO TEST"
     send(test_process, {:command, command})
 
