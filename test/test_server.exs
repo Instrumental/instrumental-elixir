@@ -3,16 +3,23 @@ defmodule TestServer do
   require Logger
 
   @doc false
-  def start(_type, test_process) do
+  def start(name, test_process, server_port \\ 4040) do
     import Supervisor.Spec
 
     children = [
       supervisor(Task.Supervisor, [[name: TestServer.TaskSupervisor]]),
-      worker(Task, [TestServer, :accept, [4040, test_process]])
+      worker(Task, [TestServer, :accept, [server_port, test_process]])
     ]
 
-    opts = [strategy: :one_for_one, name: TestServer.Supervisor]
+    opts = [strategy: :one_for_one, name: name]
     Supervisor.start_link(children, opts)
+  end
+
+  def monotonic_ports do
+    app = "test_server"
+    port = Application.get_env(app, :port, 4040)
+    Application.put_env(app, :port, port + 1)
+    port + 1
   end
 
   @doc """
@@ -53,7 +60,8 @@ defmodule TestServer do
     end
 
     Logger.info "SEND TO TEST #{inspect test_process}: #{command}"
-    send(test_process, {:command, command})
+
+    send(test_process, %{command: command, sender: self, test_pid: test_process})
 
     serve(socket, test_process)
   end

@@ -53,6 +53,7 @@ defmodule Instrumental.Connection do
   end
 
   def handle_cast({:send, cmd}, %{sock: sock, state: :connected, queue: queue} = state) do
+    Logger.debug "CAST SEND METRICS :: #{inspect state}"
     queue = queue ++ [cmd]
     queue |> Enum.each(fn(queued_cmd) -> :gen_tcp.send(sock, queued_cmd) end)
 
@@ -63,10 +64,12 @@ defmodule Instrumental.Connection do
     {:noreply, %{state | queue: queue ++ [cmd]}, 0}
   end
   def handle_cast(_, state) do
+    Logger.debug "CAST :: #{inspect state}"
     {:noreply, state}
   end
   
   def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :hello} = state) do
+    Logger.debug "AUTHENTICATE :: #{inspect state}"
     case :gen_tcp.send(sock, Protocol.authenticate) do
       :ok ->
         :inet.setopts(sock, [active: :once])
@@ -77,10 +80,12 @@ defmodule Instrumental.Connection do
     end
   end
   def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :auth} = state) do
+    Logger.debug "STATE CONNECTED :: #{inspect state}"
     :inet.setopts(sock, [active: :once])
     {:noreply, %{state | state: :connected}}
   end
   def handle_info({:tcp, sock, _}, %{sock: sock} = state) do
+    Logger.debug "HANDLE INFO :: #{inspect state}"
     :inet.setopts(sock, [active: :once])
     {:noreply, state}
   end
@@ -102,6 +107,7 @@ defmodule Instrumental.Connection do
     end
   end
   def handle_info(:timeout, %{sock: sock, state: nil} = state) do
+    Logger.debug "SAYING HELLO :: #{inspect state}"
     case :gen_tcp.send(sock, Protocol.hello) do
       :ok ->
         :inet.setopts(sock, [active: :once])
