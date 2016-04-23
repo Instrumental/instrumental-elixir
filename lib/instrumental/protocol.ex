@@ -1,9 +1,3 @@
-#
-# The MIT License (MIT)
-#
-# Copyright (c) 2014 Undead Labs, LLC
-#
-
 defmodule Instrumental.Protocol do
   alias Instrumental.Config
   alias Instrumental.OS
