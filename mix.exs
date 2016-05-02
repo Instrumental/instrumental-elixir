@@ -36,7 +36,7 @@ defmodule Instrumental.Mixfile do
 
   defp description do
     """
-    An Elixir client for Instrumental (http://instrumentalapp.com).
+    Custom metric monitoring for Elixir applications via Instrumental (http://instrumentalapp.com).
     """
   end
 
