@@ -46,13 +46,25 @@ defmodule Instrumental.Connection do
   end
 
   def handle_cast({:send, cmd}, %{sock: sock, state: :connected} = state) do
-    :gen_tcp.send(sock, cmd)
+    :ssl.send(sock, cmd)
     {:noreply, state}
   end
   def handle_cast(_, state), do: {:noreply, state}
 
+  def handle_info({:ssl, sock, @ok}, %{sock: sock, state: :hello} = state) do
+    Logger.info "Instrumental authenticating"
+    case :ssl.send(sock, Protocol.authenticate) do
+      :ok ->
+        :ssl.setopts(sock, [active: :once])
+        {:noreply, %{state | state: :auth}}
+      {:error, _} ->
+        Logger.error "Instrumental authentication failure"
+        {:noreply, %{state | state: :auth}, @auth_retry}
+    end
+  end
+
   def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :hello} = state) do
-    case :gen_tcp.send(sock, Protocol.authenticate) do
+    case :ssl.send(sock, Protocol.authenticate) do
       :ok ->
         :inet.setopts(sock, [active: :once])
         {:noreply, %{state | state: :auth}}
@@ -61,8 +73,13 @@ defmodule Instrumental.Connection do
         {:noreply, %{state | state: :auth}, @auth_retry}
     end
   end
+
   def handle_info({:tcp, sock, @ok}, %{sock: sock, state: :auth} = state) do
     :inet.setopts(sock, [active: :once])
+    {:noreply, %{state | state: :connected}}
+  end
+  def handle_info({:ssl, sock, @ok}, %{sock: sock, state: :auth} = state) do
+    :ssl.setopts(sock, [active: :once])
     {:noreply, %{state | state: :connected}}
   end
   def handle_info({:tcp, sock, _}, %{sock: sock} = state) do
@@ -86,10 +103,12 @@ defmodule Instrumental.Connection do
         {:noreply, %State{}, @connect_retry}
     end
   end
+  # Instrumental.Connection.handle_info({:ssl, {:sslsocket, {:gen_tcp, #Port<0.5120>, :tls_connection, :undefined}, #PID<0.128.0>}, "ok\n"}, %Instrumental.Connection.State{sock: {:sslsocket, {:gen_tcp, #Port<0.5120>, :tls_connection, :undefined}, #PID<0.128.0>}, state: :hello})
   def handle_info(:timeout, %{sock: sock, state: nil} = state) do
-    case :gen_tcp.send(sock, Protocol.hello) do
+    Logger.info "Instrumental saying hello"
+    case :ssl.send(sock, Protocol.hello) do
       :ok ->
-        :inet.setopts(sock, [active: :once])
+        :ssl.setopts(sock, [active: :once])
         {:noreply, %{state | sock: sock, state: :hello}}
       {:error, _} ->
         Logger.error "Failed to send hello to instrumental"
@@ -97,9 +116,11 @@ defmodule Instrumental.Connection do
     end
   end
   def handle_info(:timeout, %{sock: sock, state: :auth} = state) do
-    case :gen_tcp.send(sock, Protocol.authenticate) do
+    Logger.info "Instrumental authenticating"
+    case :ssl.send(sock, Protocol.authenticate) do
       :ok ->
-        :inet.setopts(sock, [active: :once])
+        :ssl.setopts(sock, [active: :once])
+        #:inet.setopts(sock, [active: :once])
         {:noreply, %{state | auth: true}}
       {:error, _} ->
         Logger.error "Failed to authenticate with instrumental"
@@ -109,7 +130,7 @@ defmodule Instrumental.Connection do
 
   def terminate(_, %{sock: nil}), do: :ok
   def terminate(_, %{sock: sock}) do
-    :gen_tcp.close(sock)
+    :ssl.close(sock)
     :ok
   end
 
@@ -118,6 +139,6 @@ defmodule Instrumental.Connection do
   #
 
   defp connect do
-    :gen_tcp.connect(Config.host, Config.port, [mode: :binary, packet: 0, active: false, keepalive: true])
+    :ssl.connect(Config.host, Config.port, [mode: :binary, packet: 0, active: false, keepalive: true])
   end
 end

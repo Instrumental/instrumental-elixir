@@ -16,7 +16,8 @@ defmodule Instrumental.Mixfile do
     [
       mod: {Instrumental, []},
       applications: [
-        :logger
+        :logger,
+        :ssl
       ],
       registered: [
         Instrumental.Supervisor,
@@ -24,7 +25,7 @@ defmodule Instrumental.Mixfile do
       ],
       env: [
         host: "collector.instrumentalapp.com",
-        port: 8000,
+        port: 8001,
         token: "",
       ],
     ]
